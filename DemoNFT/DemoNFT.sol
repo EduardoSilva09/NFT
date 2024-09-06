@@ -177,14 +177,49 @@ interface ERC721TokenReceiver {
     function tokenURI(uint256 _tokenId) external view returns (string memory);
 }
 
-contract DemoNFT is ERC721, ERC165, ERC721Metadata {
+/// @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
+/// @dev See https://eips.ethereum.org/EIPS/eip-721
+///  Note: the ERC-165 identifier for this interface is 0x780e9d63.
+/* is ERC721 */ interface ERC721Enumerable {
+    /// @notice Count NFTs tracked by this contract
+    /// @return A count of valid NFTs tracked by this contract, where each one of
+    ///  them has an assigned and queryable owner not equal to the zero address
+    function totalSupply() external view returns (uint256);
+
+    /// @notice Enumerate valid NFTs
+    /// @dev Throws if `_index` >= `totalSupply()`.
+    /// @param _index A counter less than `totalSupply()`
+    /// @return The token identifier for the `_index`th NFT,
+    ///  (sort order not specified)
+    function tokenByIndex(uint256 _index) external view returns (uint256);
+
+    /// @notice Enumerate NFTs assigned to an owner
+    /// @dev Throws if `_index` >= `balanceOf(_owner)` or if
+    ///  `_owner` is the zero address, representing invalid NFTs.
+    /// @param _owner An address where we are interested in NFTs owned by them
+    /// @param _index A counter less than `balanceOf(_owner)`
+    /// @return The token identifier for the `_index`th NFT assigned to `_owner`,
+    ///   (sort order not specified)
+    function tokenOfOwnerByIndex(
+        address _owner,
+        uint256 _index
+    ) external view returns (uint256);
+}
+
+contract DemoNFT is ERC721, ERC165, ERC721Metadata, ERC721Enumerable {
     // Os eventos são herdados
     mapping(address => uint256) internal _balanceOf; //owner => balance
     mapping(uint256 => address) internal _ownerOf; //tokenId => owner
     mapping(uint256 => address) internal _approvals; //tokenId => approved operator
     mapping(address => mapping(address => bool)) public isApprovedForAll; //owner => (operator=> bool)
     mapping(uint256 => string) internal _uris; //TokenId => URI
-    uint internal _lastId;
+
+    uint256[] internal _allTokens;
+    mapping(uint256 => uint256) internal _allTokensIndex; // tokenId => global index
+    mapping(address => mapping(uint256 => uint256)) internal _ownedTokens; //owner => (owner index => tokenId)
+    mapping(uint256 => uint256) internal _ownedTokensIndex; //tokenId => owner index
+
+    uint256 internal _lastId;
 
     function mint() public {
         _lastId++;
@@ -196,6 +231,11 @@ contract DemoNFT is ERC721, ERC165, ERC721Metadata {
             "https://demonftexample.com.br/nfts/",
             Strings.toString(_lastId)
         );
+
+        _allTokens.push(_lastId);
+        _allTokensIndex[_lastId] = _allTokens.length - 1;
+        _ownedTokens[msg.sender][_balanceOf[msg.sender] - 1] = _lastId;
+        _ownedTokensIndex[_lastId] = _balanceOf[msg.sender] - 1;
 
         emit Transfer(address(0), msg.sender, _lastId);
     }
@@ -212,6 +252,18 @@ contract DemoNFT is ERC721, ERC165, ERC721Metadata {
         _balanceOf[owner]--;
         delete _uris[_tokenId];
         delete _approvals[_tokenId];
+
+        uint256 removedIndex = _allTokensIndex[_tokenId];
+        _allTokens[removedIndex] = _allTokens[_allTokens.length - 1];
+        _allTokens.pop();
+        delete _allTokensIndex[_tokenId];
+
+        uint256 removedOwnedIndex = _ownedTokensIndex[_tokenId];
+        _ownedTokens[msg.sender][removedOwnedIndex] = _ownedTokens[msg.sender][
+            _balanceOf[msg.sender] - 1
+        ];
+        delete _ownedTokens[msg.sender][_balanceOf[msg.sender] - 1];
+        delete _ownedTokensIndex[_tokenId];
 
         emit Transfer(owner, address(0), _tokenId);
         emit Approval(owner, address(0), _tokenId);
@@ -333,7 +385,8 @@ contract DemoNFT is ERC721, ERC165, ERC721Metadata {
         return
             interfaceID == type(ERC721).interfaceId ||
             interfaceID == type(ERC165).interfaceId ||
-            interfaceID == type(ERC721Metadata).interfaceId;
+            interfaceID == type(ERC721Metadata).interfaceId ||
+            interfaceID == type(ERC721Enumerable).interfaceId;
     }
 
     function name() external pure returns (string memory _name) {
@@ -347,5 +400,22 @@ contract DemoNFT is ERC721, ERC165, ERC721Metadata {
     function tokenURI(uint256 _tokenId) external view returns (string memory) {
         require(_ownerOf[_tokenId] != address(0), "token does not exists");
         return _uris[_tokenId];
+    }
+
+    function totalSupply() external view returns (uint256) {
+        return _allTokens.length;
+    }
+
+    function tokenByIndex(uint256 _index) external view returns (uint256) {
+        require(_index < _allTokens.length, "Index out of bounds");
+        return _allTokens[_index];
+    }
+
+    function tokenOfOwnerByIndex(
+        address _owner,
+        uint256 _index
+    ) external view returns (uint256) {
+        require(_index < _balanceOf[_owner], "Index out of bounds");
+        return _ownedTokens[_owner][_index];
     }
 }
