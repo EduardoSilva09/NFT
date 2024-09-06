@@ -166,6 +166,11 @@ contract DemoNFT is ERC721, ERC165 {
     mapping(uint256 => address) internal _approvals; //tokenId => approved operator
     mapping(address => mapping(address => bool)) public isApprovedForAll; //owner => (operator=> bool)
 
+    constructor() {
+        _ownerOf[1] = msg.sender;
+        _balanceOf[msg.sender] = 1;
+    }
+
     function balanceOf(address _owner) external view returns (uint256) {
         require(_owner != address(0), "Address must be different of zero");
         return _balanceOf[_owner];
