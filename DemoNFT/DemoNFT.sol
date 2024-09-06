@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Strings.sol"; // Use Remix
 
 interface ERC165 {
     /// @notice Query if a contract implements an interface
@@ -159,16 +160,44 @@ interface ERC721TokenReceiver {
     ) external returns (bytes4);
 }
 
-contract DemoNFT is ERC721, ERC165 {
+/// @title ERC-721 Non-Fungible Token Standard, optional metadata extension
+/// @dev See https://eips.ethereum.org/EIPS/eip-721
+///  Note: the ERC-165 identifier for this interface is 0x5b5e139f.
+/* is ERC721 */ interface ERC721Metadata {
+    /// @notice A descriptive name for a collection of NFTs in this contract
+    function name() external view returns (string memory _name);
+
+    /// @notice An abbreviated name for NFTs in this contract
+    function symbol() external view returns (string memory _symbol);
+
+    /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
+    /// @dev Throws if `_tokenId` is not a valid NFT. URIs are defined in RFC
+    ///  3986. The URI may point to a JSON file that conforms to the "ERC721
+    ///  Metadata JSON Schema".
+    function tokenURI(uint256 _tokenId) external view returns (string memory);
+}
+
+contract DemoNFT is ERC721, ERC165, ERC721Metadata {
     // Os eventos são herdados
     mapping(address => uint256) internal _balanceOf; //owner => balance
     mapping(uint256 => address) internal _ownerOf; //tokenId => owner
     mapping(uint256 => address) internal _approvals; //tokenId => approved operator
     mapping(address => mapping(address => bool)) public isApprovedForAll; //owner => (operator=> bool)
+    mapping(uint256 => string) internal _uris; //TokenId => URI
+    uint internal _lastId;
 
-    constructor() {
-        _ownerOf[1] = msg.sender;
-        _balanceOf[msg.sender] = 1;
+    function mint() public {
+        _lastId++;
+
+        _ownerOf[_lastId] = msg.sender;
+        _balanceOf[msg.sender]++;
+
+        _uris[_lastId] = string.concat(
+            "https://demonftexample.com.br/nfts/",
+            Strings.toString(_lastId)
+        );
+
+        emit Transfer(address(0), msg.sender, _lastId);
     }
 
     function balanceOf(address _owner) external view returns (uint256) {
@@ -286,6 +315,20 @@ contract DemoNFT is ERC721, ERC165 {
     ) external pure returns (bool) {
         return
             interfaceID == type(ERC721).interfaceId ||
-            interfaceID == type(ERC165).interfaceId;
+            interfaceID == type(ERC165).interfaceId ||
+            interfaceID == type(ERC721Metadata).interfaceId;
+    }
+
+    function name() external pure returns (string memory _name) {
+        return "Demo NFT";
+    }
+
+    function symbol() external pure returns (string memory _symbol) {
+        return "DNFT";
+    }
+
+    function tokenURI(uint256 _tokenId) external view returns (string memory) {
+        require(_ownerOf[_tokenId] != address(0), "token does not exists");
+        return _uris[_tokenId];
     }
 }
