@@ -260,9 +260,9 @@ contract DemoNFT is ERC721, ERC165, ERC721Metadata, ERC721Enumerable {
 
         uint256 removedOwnedIndex = _ownedTokensIndex[_tokenId];
         _ownedTokens[msg.sender][removedOwnedIndex] = _ownedTokens[msg.sender][
-            _balanceOf[msg.sender] - 1
+            _balanceOf[msg.sender]
         ];
-        delete _ownedTokens[msg.sender][_balanceOf[msg.sender] - 1];
+        delete _ownedTokens[msg.sender][_balanceOf[msg.sender]];
         delete _ownedTokensIndex[_tokenId];
 
         emit Transfer(owner, address(0), _tokenId);
