@@ -200,6 +200,23 @@ contract DemoNFT is ERC721, ERC165, ERC721Metadata {
         emit Transfer(address(0), msg.sender, _lastId);
     }
 
+    function burn(uint256 _tokenId) public {
+        address owner = _ownerOf[_tokenId];
+        require(owner != address(0), "The token does not exists");
+        require(
+            _isApprovedOrOwner(owner, msg.sender, _tokenId),
+            "you do not have permission"
+        );
+
+        _ownerOf[_tokenId] = address(0);
+        _balanceOf[owner]--;
+        delete _uris[_tokenId];
+        delete _approvals[_tokenId];
+
+        emit Transfer(owner, address(0), _tokenId);
+        emit Approval(owner, address(0), _tokenId);
+    }
+
     function balanceOf(address _owner) external view returns (uint256) {
         require(_owner != address(0), "Address must be different of zero");
         return _balanceOf[_owner];
