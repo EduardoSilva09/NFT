@@ -127,7 +127,7 @@ describe("ProtoNFT", function () {
     const tokenId = 0;
 
     expect(await contract.tokenURI(tokenId))
-      .to.equal("https://www.protonft.example.com/nfts/0.json", "Can't get URI Metadata");
+      .to.equal("ipfs://QmVxCeniSFUooWsEFBAEGCS7yNm5ZabT7LvoZKzw5BF8aw/0.json", "Can't get URI Metadata");
   });
 
   it("Should NOT has URI metadata", async function () {

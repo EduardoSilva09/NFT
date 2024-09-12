@@ -32,7 +32,7 @@ contract ProtoNFT is ERC721A {
     }
 
     function _baseURI() internal pure override returns (string memory) {
-        return "https://www.protonft.example.com/nfts/";
+        return "ipfs://QmVxCeniSFUooWsEFBAEGCS7yNm5ZabT7LvoZKzw5BF8aw/";
     }
 
     modifier restricted() {
