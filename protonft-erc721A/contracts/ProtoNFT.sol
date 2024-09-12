@@ -35,6 +35,11 @@ contract ProtoNFT is ERC721A {
         return "ipfs://QmVxCeniSFUooWsEFBAEGCS7yNm5ZabT7LvoZKzw5BF8aw/";
     }
 
+    function contractURI() public pure returns (string memory) {
+        return
+            "ifps://QmVxCeniSFUooWsEFBAEGCS7yNm5ZabT7LvoZKzw5BF8aw/contract.json";
+    }
+
     modifier restricted() {
         require(_owner == msg.sender, "You do not have permission");
         _;
