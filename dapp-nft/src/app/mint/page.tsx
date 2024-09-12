@@ -1,6 +1,7 @@
 "use client"
 
 import { ChangeEvent, useEffect, useState } from "react";
+import { login } from "../services/Web3Services";
 
 export default function Home() {
   const [wallet, setWallet] = useState<string>("");
@@ -14,10 +15,13 @@ export default function Home() {
 
   function btnLoginClick() {
     setMessage("Logging In...");
-    alert('login')
-    setWallet("0x123");
-    localStorage.setItem("wallet", "0x123")
-    setMessage("");
+    login()
+      .then(wallet => {
+        setWallet(wallet);
+        localStorage.setItem("wallet", wallet)
+        setMessage("");
+      })
+      .catch(err => setMessage(err.message));
   }
 
   function btnLogoutClick() {
