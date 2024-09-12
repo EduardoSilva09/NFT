@@ -7,28 +7,16 @@ dotenv.config();
 const config: HardhatUserConfig = {
   solidity: "0.8.24",
   networks: {
-    avaxtest: {
-      url: 'https://api.avax-test.network/ext/bc/C/rpc',
-      accounts: [`${process.env.PRIVATE_KEY}`]
-    },
+    bsctest: {
+      url: process.env.BSCTEST_URL,
+      chainId: 97,
+      accounts: {
+        mnemonic: process.env.BSCTEST_SECRET
+      }
+    }
   },
   etherscan: {
-    apiKey: {
-      snowtrace: "snowtrace",
-    },
-    customChains: [
-      {
-        network: "snowtrace",
-        chainId: 43113,
-        urls: {
-          apiURL: "https://api.routescan.io/v2/network/testnet/evm/43113/etherscan",
-          browserURL: "https://testnet.snowtrace.io"
-        }
-      }
-    ]
-  },
-  sourcify: {
-    enabled: false
+    apiKey: process.env.API_KEY
   }
 };
 
