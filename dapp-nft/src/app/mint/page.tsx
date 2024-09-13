@@ -1,7 +1,7 @@
 "use client"
 
 import { ChangeEvent, useEffect, useState } from "react";
-import { login } from "../services/Web3Services";
+import { login, mint } from "../services/Web3Services";
 
 export default function Home() {
   const [wallet, setWallet] = useState<string>("");
@@ -32,9 +32,13 @@ export default function Home() {
   }
 
   function btnMintClick() {
-    alert('Mint')
     setMessage("Minting...");
-    setQuantity(1);
+    mint(quantity)
+      .then(tx => {
+        setMessage("Tx Id: " + (tx || "error"))
+        setQuantity(1);
+      })
+      .catch(err => setMessage(err.message));
   }
 
   function onQuantityChange(evt: ChangeEvent<HTMLInputElement>) {
