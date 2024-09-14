@@ -313,4 +313,73 @@ describe("Multitoken", function () {
       .to.be.revertedWithCustomError(contract, "ERC1155MissingApprovalForAll");
   });
 
+  it("should support the ERC-1155 interface", async function () {
+    const { contract } = await loadFixture(deployFixture);
+
+    // The ERC-1155 interface ID (0xd9b67a26) should be supported
+    const supportsERC1155 = await contract.supportsInterface("0xd9b67a26");
+
+    // Verify that the contract correctly reports support for the ERC-1155 interface
+    expect(supportsERC1155).to.equal(true, "The contract does not support the ERC-1155 interface");
+  });
+
+  it("should correctly withdraw funds from the contract", async function () {
+    const { contract, contractAddress, owner, otherAccount } = await loadFixture(deployFixture);
+
+    // Connect to the contract as `otherAccount` and mint a token to trigger a deposit
+    const instance = contract.connect(otherAccount);
+    await instance.mint(0, { value: ethers.parseEther("0.01") });
+
+    // Check the contract's and owner's balance before the withdrawal
+    const contractBalanceBefore = await ethers.provider.getBalance(contractAddress);
+    const ownerBalanceBefore = await ethers.provider.getBalance(owner.address);
+
+    // Perform the withdrawal from the contract
+    await contract.withdraw();
+
+    // Check the contract's and owner's balance after the withdrawal
+    const contractBalanceAfter = await ethers.provider.getBalance(contractAddress);
+    const ownerBalanceAfter = await ethers.provider.getBalance(owner.address);
+
+    // Verify the contract's balance is zero after the withdrawal
+    expect(contractBalanceAfter).to.equal(0, "The contract balance should be zero after withdrawal");
+
+    // Verify the contract balance was correctly withdrawn (initial balance minus amount withdrawn)
+    expect(contractBalanceBefore).to.equal(ethers.parseEther("0.01"), "The contract balance before withdrawal is incorrect");
+
+    // Verify the owner's balance has increased by the withdrawn amount
+    expect(ownerBalanceAfter).to.be.greaterThan(ownerBalanceBefore, "The owner's balance should increase after withdrawal");
+  });
+
+  it("should revert with 'You do not have permission' when an unauthorized account attempts to withdraw funds", async function () {
+    const { contract, otherAccount } = await loadFixture(deployFixture);
+
+    // Connect to the contract as `otherAccount`, who should not have permission to withdraw
+    const instance = contract.connect(otherAccount);
+
+    // Attempt to perform the withdrawal from an unauthorized account
+    await expect(instance.withdraw())
+      .to.be.revertedWith("You do not have permission");
+  });
+
+  it("should return the correct URI for the token metadata", async function () {
+    const { contract } = await loadFixture(deployFixture);
+
+    // Mint a token to trigger the URI setup
+    await contract.mint(0, { value: ethers.parseEther("0.01") });
+
+    // Retrieve the URI for token ID 0
+    const uri = await contract.uri(0);
+
+    // Verify that the URI matches the expected value
+    expect(uri).to.equal("https://examplemultitoken.com/tokens/0.json", "The URI for token ID 0 is incorrect");
+  });
+
+  it("should revert with 'This token does not exist' when requesting URI metadata for a non-existent token", async function () {
+    const { contract } = await loadFixture(deployFixture);
+
+    // Attempt to retrieve the URI for a token ID that does not exist
+    await expect(contract.uri(10))
+      .to.be.revertedWith("This token does not exist");
+  });
 });
