@@ -1,5 +1,5 @@
 {
-  "name": "multitoken-erc1155",
+  "name": "multitoken-erc1155-upgradeable",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
