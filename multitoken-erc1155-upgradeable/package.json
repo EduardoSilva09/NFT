@@ -6,8 +6,9 @@
   "scripts": {
     "test": "npx hardhat coverage",
     "compile": "npx hardhat compile",
-    "deploy:bsc": "npx hardhat run scripts/deploy.ts --network bsctest",
-    "ignition:bsc": "npx hardhat ignition deploy ignition/modules/Multitoken.ts --network bsctest"
+    "deploy": "npx hardhat run scripts/deploy.ts --network matictestnet",
+    "ignition": "npx hardhat ignition deploy ignition/modules/Multitoken.ts --network matictestnet",
+    "update": "npx hardhat run scripts/update.ts --network matictestnet"
   },
   "keywords": [],
   "author": "Eduardo Silva",
