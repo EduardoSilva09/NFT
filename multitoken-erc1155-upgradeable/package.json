@@ -1,0 +1,25 @@
+{
+  "name": "multitoken-erc1155",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat coverage",
+    "compile": "npx hardhat compile",
+    "deploy:bsc": "npx hardhat run scripts/deploy.ts --network bsctest",
+    "ignition:bsc": "npx hardhat ignition deploy ignition/modules/Multitoken.ts --network bsctest"
+  },
+  "keywords": [],
+  "author": "Eduardo Silva",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.10"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2",
+    "@openzeppelin/contracts-upgradeable": "^5.0.2",
+    "@openzeppelin/hardhat-upgrades": "^3.2.1",
+    "dotenv": "^16.4.5"
+  }
+}
