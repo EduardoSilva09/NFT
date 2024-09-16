@@ -145,7 +145,7 @@ describe("NFT Market", function () {
     ).to.be.revertedWith("Price cannot be zero");
   });
 
-  it("should revert if the sent value is incorrect", async function () {
+  it("should revert when creating a market item with a value less than the listing price", async function () {
     // Arrange: Deploy contracts and mint an NFT
     const { nftMarket, nftCollection, collectionAddress } = await loadFixture(deployFixture);
     await nftCollection.mint("metadata uri");
@@ -160,7 +160,7 @@ describe("NFT Market", function () {
     ).to.be.revertedWith("Value must be equal listing price");
   });
 
-  it("should revert if the sent value is incorrect", async function () {
+  it("should revert when purchasing a market item with a value different from the asking price", async function () {
     const { nftMarket, nftCollection, collectionAddress, otherAccount } = await loadFixture(deployFixture);
     // Arrange: Mint an NFT with a specific metadata URI
     await nftCollection.mint("metadata uri");
