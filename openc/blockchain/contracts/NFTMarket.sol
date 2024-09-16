@@ -61,10 +61,7 @@ contract NFTMarket is ReentrancyGuard {
         uint price
     ) public payable nonReentrant {
         require(price > 0, "Price cannot be zero");
-        require(
-            msg.value == listingPrice,
-            "Value muste be equal listing price"
-        );
+        require(msg.value == listingPrice, "Value must be equal listing price");
         _itemIds++;
         uint itemId = _itemIds;
         marketItems[itemId] = MarketItem(
