@@ -2,8 +2,9 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract NFTMarket {
+contract NFTMarket is ReentrancyGuard {
     address payable owner;
     uint public listingPrice = 0.025 ether;
     uint private _itemIds;
@@ -36,7 +37,7 @@ contract NFTMarket {
         address nftContract,
         uint tokenId,
         uint price
-    ) public payable {
+    ) public payable nonReentrant {
         require(price > 0, "Price cannot be zero");
         require(
             msg.value == listingPrice,
