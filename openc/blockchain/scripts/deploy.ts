@@ -1,13 +1,18 @@
 import { ethers } from "hardhat";
 
 async function main() {
+
   const NFTMarket = await ethers.getContractFactory("NFTMarket");
-  const contract = await NFTMarket.deploy();
+  const nftMarket = await NFTMarket.deploy();
 
-  await contract.waitForDeployment();
-  const address = await contract.getAddress();
+  await nftMarket.waitForDeployment();
+  console.log(`NFTMarket deployed to ${nftMarket.target}`);
 
-  console.log(`Contract was deployed at ${address}`);
+  const NFTCollection = await ethers.getContractFactory("NFTCollection");
+  const nftCollection = await NFTCollection.deploy(nftMarket.target);
+
+  await nftCollection.waitForDeployment();
+  console.log(`NFTCollection deployed to ${nftCollection.target}`);
 }
 
 main().catch((error) => {

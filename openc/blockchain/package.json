@@ -7,7 +7,7 @@
     "test": "npx hardhat coverage",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy.ts --network matictestnet",
-    "ignition": "npx hardhat ignition deploy ignition/modules/NFTMarket.ts --network matictestnet",
+    "ignition": "npx hardhat ignition deploy ignition/modules/openc.ts --network matictestnet",
     "update": "npx hardhat run scripts/update.ts --network matictestnet"
   },
   "keywords": [],
