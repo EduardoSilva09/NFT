@@ -191,3 +191,40 @@ export async function loadMyNFTs(): Promise<NFT[]> {
 
   return items;
 }
+
+/**
+ * Fetches all NFTs available on the marketplace.
+ *
+ * @returns {Promise<NFT[]>} A promise that resolves to an array of NFT objects available in the marketplace.
+ * 
+ * @throws {Error} Throws an error if the network request fails or if the NFTs cannot be fetched.
+ *
+ */
+export async function loadNFTs(): Promise<NFT[]> {
+  const provider = await getProvider();
+
+  const marketContract = new ethers.Contract(MARKETPLACE_ADDRESS, NFTMarketABI, provider);
+  const collectionContract = new ethers.Contract(COLLECTION_ADDRESS, NFTCollectionABI, provider);
+
+  const data = await marketContract.fetchMarketItems();
+  if (!data || !data.length) return [];
+
+  const items = await Promise.all(data.map(async (item: NFT) => {
+    const tokenUri = await collectionContract.tokenURI(item.tokenId);
+    const metadata = await axios.get(tokenUri.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/"));
+    const price = ethers.formatUnits(item.price.toString(), "ether");
+
+    return {
+      price,
+      itemId: item.itemId,
+      tokenId: item.tokenId,
+      seller: item.seller,
+      owner: item.owner,
+      image: metadata.data.image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/"),
+      name: metadata.data.name,
+      description: metadata.data.description
+    } as NFT
+  }))
+
+  return items;
+}
